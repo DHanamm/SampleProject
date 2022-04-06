@@ -1,0 +1,39 @@
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.types.{IntegerType,StringType,StructField,StructType}
+import com.databricks.spark.xml
+
+object readxmlfile {
+  def main(args: Array[String]): Unit = {
+    println("Apache spark application started")
+
+    val spark=SparkSession.builder()
+      .appName(name = "create dataframe from xml")
+      .master(master = "local[*]")
+      .getOrCreate()
+    spark.sparkContext.setLogLevel("Error")
+    println("approach1:")
+    import spark.implicits._
+    import xml._
+    val xml_file_path="C:\\Users\\DH20288011\\IdeaProjects\\Example2\\project\\userdetails"
+    val users_df_1=spark.read.option("rowtag","user").xml(xml_file_path)
+
+    users_df_1.show(numRows = 10,truncate = false)
+    users_df_1.printSchema()
+
+    println("Approach2")
+    val user_schema=StructType(Array(
+      StructField("user_id", IntegerType, true),
+      StructField("user_name", StringType,true),
+      StructField("user_city", StringType,true)
+    ))
+    val users_df_2=spark.read.schema(user_schema).option("rowtag","user").xml(xml_file_path)
+
+    users_df_2.show(numRows = 10,truncate = false)
+    users_df_2.printSchema()
+    spark.stop()
+    println("Apachespark application completed")
+
+  }
+}
+
